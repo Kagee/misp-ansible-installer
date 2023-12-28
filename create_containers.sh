@@ -7,7 +7,7 @@ read
 
 source env.sh
 
-for distro in "alma9" "deb12" "ubu20" "ubu22"; do
+for distro in "alma9" "deb11" "deb12" "ubu20" "ubu22"; do
   DISTRO=${distro^^};
   NAME="${distro}-misp"
   CONTAINER_IMAGE="${DISTRO}_CONTAINER_IMAGE"
