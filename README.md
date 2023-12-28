@@ -10,6 +10,10 @@ It is currently in a barly-started state, and probably useless for you.
 * ./prepare_rhel_qcow2.sh
 * ./create_rhel_kvm.sh
 
+restorecon -FRv /root/.ssh`
+incus exec deb12-misp -- apt install -y openssh-server
+incus exec deb12-misp -- mkdir -p /root/.ssh
+
 lxc launch ubuntu:20.04 misp-develop
 lxc launch images:almalinux/8 deleteme
 lxc exec alma-8 -- /bin/bash
@@ -21,5 +25,5 @@ eth0
 lxc exec deleteme -- ip -4 addr show eth0 | awk '/inet/ {print $2}'  | cut -d/ -f1
 10.170.0.187/24
 
-# Ansible in virtual envirionment
+# Ansible
 pipx install --include-deps ansible
