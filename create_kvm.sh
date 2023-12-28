@@ -52,17 +52,22 @@ for rhel in "rhel8" "rhel9"; do
   echo "Copying master ${!QCOW} to $DISK"
   rsync --quiet "${!QCOW}" "$DISK"
   echo "Generating XML for VM"
-  XML=$(sudo virt-install --name "$NAME" --import --disk "${DISK}" --os-variant "${!VARIANT}" --graphics none --network "network=$KVM_NETWORK,mac=${!MAC}" --print-xml)
+  XML=$(sudo virt-install --name "$NAME" --import --disk "${DISK}" --os-variant "${!VARIANT}" --graphics none --network "network=$KVM_NETWORK" --print-xml)
   echo "Creating VM using virsh define /dev/stdin"
   echo "$XML" | sudo bash -c "virsh define /dev/stdin" || { rm "$DISK" && exit; }
   sudo virsh start "$NAME"
   echo ""
 done
-sleep 5
+echo "Waiting for hosts to get IPs..."
 sudo virsh list --all | grep -o 'rhel.-misp' | cat | while read -r NAME; do
-IP=$(sudo virsh domifaddr "$NAME" --full | grep 'ipv4' | awk '{print $NF}' | cut -d/ -f1)
-echo $NAME $IP
-ssh-keygen -f "/home/hildenae/.ssh/known_hosts" -R "$IP" 2>/dev/null 1>/dev/null
+  while true; do
+    IP=$(sudo virsh domifaddr "$NAME" --full | grep 'ipv4' | awk '{print $NF}' | cut -d/ -f1)
+    if [[ -n "$IP" ]]; then
+      break;
+    fi
+    done
+    echo $NAME $IP
+    ssh-keygen -f "/home/hildenae/.ssh/known_hosts" -R "$IP" 2>/dev/null 1>/dev/null;
 done
 
 
